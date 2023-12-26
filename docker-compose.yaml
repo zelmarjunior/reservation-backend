@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=reservation_system
+      - MYSQL_ROOT_PASSWORD=root
+      - LANG=en_US.utf8
+    command:
+      - '--character-set-server=utf8'
+      - '--collation-server=utf8_general_ci'
+      - '--sql_mode='
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./src/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./src/database/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+
