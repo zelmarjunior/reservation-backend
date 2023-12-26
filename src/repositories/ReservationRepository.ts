@@ -6,16 +6,9 @@ import { log } from "console";
 const ReservationRepository = AppDataSource.getRepository(Reservation);
 
 export interface IReservationsIntoTime {
-    reservation_time: string,
+    time: string,
     total_seats: string,
 }
-
-const getReservations = async (date: string, restaurantId: number): Promise<IReservation[]> => {
-    const rawSql = `SELECT time, SUM(seats) AS total_seats FROM reservation WHERE date = '${date}' AND restaurantId = ${restaurantId} GROUP BY time ORDER BY time ASC;`;
-
-
-    return await ReservationRepository.query(rawSql);
-};
 
 const getAllReservations = async (restaurantId: number): Promise<Reservation[]> => {
     return await ReservationRepository
@@ -33,75 +26,27 @@ const getAllReservations = async (restaurantId: number): Promise<Reservation[]> 
         return await ReservationRepository.query(rawSql); */
 }
 
-const getReservationsExpecificTime = async (date: string, time: string, seats: number, restaurantId: number): Promise<Reservation[]> => {
-    console.log(date);
+const getReservationsIntoDayOrderBySeats = async (date: string, restaurantId: number): Promise<IReservationsIntoTime[]> => {
+    const rawSql = `SELECT all_times.time, ifnull(sum(reservation.seats), 0) total_seats
+    FROM all_times
+    LEFT JOIN reservation ON all_times.time = reservation.time AND reservation.date = '${date}' AND reservation.restaurantId = ${restaurantId}
+    GROUP BY all_times.time
+    ORDER BY total_seats;`
 
-    return await ReservationRepository
-        .createQueryBuilder('reservation')
-        .select('SUM(reservation.seats)', 'reservation')
-        .where('reservation.time = :time', { time })
-        .andWhere('reservation.date = :date', { date })
-        .andWhere('reservation.restaurantId = :restaurantId', { restaurantId })
-        .getRawOne();
-}
-const getReservationsIntoDayOrderBySeats = async (date: string, restaurantId: number): Promise<Reservation[]> => {
-    console.log(date);
-
-    return await ReservationRepository
-        .createQueryBuilder('reservation')
-        .select(['reservation.time', 'SUM(reservation.seats) as total_seats'])
-        .innerJoin('reservation.userCustomer', 'userCustomer')
-        .innerJoin('reservation.restaurant', 'restaurant')
-        .where('reservation.date = :date ', { date })
-        .andWhere('restaurant.id = :restaurantId', { restaurantId })
-        .groupBy('reservation.time')
-        .orderBy('total_seats', 'ASC')
-        .getRawMany();
+    return await ReservationRepository.query(rawSql)
 }
 
 const getReservationsIntoDayOrderByTime = async (date: string, restaurantId: number): Promise<IReservationsIntoTime[]> => {
+    const rawSql = `SELECT all_times.time, ifnull(sum(reservation.seats), 0) total_seats
+    FROM all_times
+    LEFT JOIN reservation ON all_times.time = reservation.time AND reservation.date = '${date}' AND reservation.restaurantId = ${restaurantId}
+    GROUP BY all_times.time
+    ORDER BY all_times.time;`
 
-    return await ReservationRepository
-        .createQueryBuilder('reservation')
-        .select(['reservation.time', 'SUM(reservation.seats) as total_seats'])
-        .innerJoin('reservation.userCustomer', 'userCustomer')
-        .innerJoin('reservation.restaurant', 'restaurant')
-        .where('reservation.date = :date ', { date })
-        .andWhere('restaurant.id = :restaurantId', { restaurantId })
-        .groupBy('reservation.time')
-        .orderBy('reservation.time', 'ASC')
-        .getRawMany();
+    return await ReservationRepository.query(rawSql)
 }
-
-const getGroupByTimes = async (date: string, restaurantId: number): Promise<Reservation[]> => {
-    console.log(date);
-
-    return await ReservationRepository
-        .createQueryBuilder('reservation')
-        .select(['reservation.time', 'SUM(reservation.seats) AS total_seats'])
-        .where('reservation.date = :date AND reservation.restaurantId = :restaurantId', { date: '2023-12-26', restaurantId: 1 })
-        .groupBy('reservation.time')
-        .orderBy('total_seats', 'ASC')
-        .getRawMany();
-}
-
-/* const create = async (date: string, restaurantId: number): Promise<boolean> => {
-    console.log(date);
-
-    return await ReservationRepository
-        .createQueryBuilder('reservation')
-        .select(['reservation.time', 'SUM(reservation.seats) AS total_seats'])
-        .where('reservation.date = :date AND reservation.restaurantId = :restaurantId', { date: '2023-12-26', restaurantId: 1 })
-        .groupBy('reservation.time')
-        .orderBy('total_seats', 'ASC')
-        .getRawMany();
-}
- */
-
-
 
 const getReservationsIntoTime = async (date: string, time: string, restaurantId: number): Promise<IReservationsIntoTime[]> => {
-    console.log(date);
 
     return await ReservationRepository
         .createQueryBuilder('reservation')
@@ -111,4 +56,4 @@ const getReservationsIntoTime = async (date: string, time: string, restaurantId:
         .orderBy('total_seats', 'ASC')
         .getRawMany();
 }
-export default { ReservationRepository, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getReservationsExpecificTime, getReservations, getAllReservations, getReservationsIntoDayOrderBySeats, getGroupByTimes }
+export default { ReservationRepository, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getAllReservations, getReservationsIntoDayOrderBySeats }

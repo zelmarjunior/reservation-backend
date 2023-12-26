@@ -16,7 +16,7 @@ app.use(routers);
 const PORT = 3333;
 
 AppDataSource.initialize().then(async () => {
-    console.log('Data Base ok')
+    console.log('Database connection ready!')
     
     app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
