@@ -15,8 +15,8 @@ class UserCustomer {
     @Column('varchar', { length: 100, nullable: true })
     email?: number
 
-    @OneToMany(() => Reservation, (reservation) => reservation.id) // Inverso da relação em Reservation
-    reservations: Reservation[]; // Plural, pois um usuário pode ter várias reservas
+    @OneToMany(() => Reservation, (reservation) => reservation.id)
+    reservations: Reservation[];
 }
 
 export default UserCustomer;

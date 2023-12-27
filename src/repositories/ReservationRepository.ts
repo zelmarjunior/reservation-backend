@@ -1,7 +1,6 @@
 import Reservation from "../entities/Reservation";
 import { IReservation } from "../interfaces/IReservation";
 import { AppDataSource } from "../database/data-source";
-import { log } from "console";
 import Restaurant from "../entities/Restaurant";
 
 const ReservationRepository = AppDataSource.getRepository(Reservation);
@@ -18,8 +17,6 @@ const createReservation = async (date: string, time: string, seats, restaurantId
     reservation.seats = seats;
     reservation.restaurant = restaurantId;
     reservation.user_customer = userCustomerId;
-
-    console.log(reservation)
 
     return await ReservationRepository.save(reservation)
 }

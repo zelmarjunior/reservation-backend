@@ -13,9 +13,7 @@ const getUserById = (id: number): Promise<UserAdmin> => {
     return UserAdminRepository.findOneBy({ id });
 }
 
-const getUser = (username: string): Promise<UserAdmin> => {
-    console.log('teste',username);
-    
+const getUser = (username: string): Promise<UserAdmin> => {    
     return UserAdminRepository.findOneBy({ username });
 }
 

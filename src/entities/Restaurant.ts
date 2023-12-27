@@ -20,10 +20,10 @@ class Restaurant {
     log: number
 
     @OneToMany(() => Reservation, reservation => reservation.restaurant)
-    reservations: Reservation[]; // 
+    reservations: Reservation[];
   
-    @OneToMany(() => UserAdmin, userAdmin => userAdmin.restaurant) // Assuming a restaurantId column in UserAdmin
-    @JoinColumn({ name: 'restaurantId' }) // Added JoinColumn
+    @OneToMany(() => UserAdmin, userAdmin => userAdmin.restaurant)
+    @JoinColumn({ name: 'restaurantId' })
     userAdmin: UserAdmin[];
 }
 

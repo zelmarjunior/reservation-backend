@@ -28,7 +28,6 @@ UserAdminRouter.post('/createUser', async (req: Request, res: Response,): Promis
 
 UserAdminRouter.post('/login', async (req: Request, res: Response,): Promise<Response> => {
     const { username, password } = req.body;
-    console.log(username, password);
 
     const user = await UserAdminRepository.getUser(username);
 

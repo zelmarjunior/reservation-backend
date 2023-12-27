@@ -26,7 +26,7 @@ class Reservation {
     @JoinColumn({ name: 'restaurant_id' })
     restaurant: Restaurant;
   
-    @ManyToOne(() => UserCustomer, user_customer => user_customer.id) // Inverso da relação em UserCustomer
+    @ManyToOne(() => UserCustomer, user_customer => user_customer.id)
     @JoinColumn({ name: 'user_customer' })
     user_customer: UserCustomer;
 }

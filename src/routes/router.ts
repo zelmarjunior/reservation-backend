@@ -5,7 +5,7 @@ import ReservationRouter from '../controllers/ReservationController';
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 const routes = Router();
-authMiddleware
+// para proteger as rotas utilizar authMiddleware
 
 routes.use('/admin/users', UserAdminRouter);
 routes.use('/reservation', ReservationRouter);
