@@ -20,8 +20,22 @@ const createReservation = async (date: string, time: string, seats, restaurantId
     reservation.user_customer = userCustomerId;
 
     console.log(reservation)
-     
+
     return await ReservationRepository.save(reservation)
+}
+
+const deleteReservation = async (id: number) => {
+    return await ReservationRepository.delete(id)
+}
+
+const getReservationsPerDay = async (date: string, restaurantId: number): Promise<Reservation[]> => {
+    return await ReservationRepository
+        .createQueryBuilder('reservation')
+        .select(['reservation.id', 'reservation.date', 'reservation.time', 'reservation.seats', 'user_customer.username', 'user_customer.phone', 'restaurant.id'])
+        .where('reservation.date = :date', { date })
+        .innerJoin('reservation.user_customer', 'user_customer')
+        .innerJoin('reservation.restaurant', 'restaurant')
+        .getRawMany();
 }
 
 const getAllReservations = async (restaurantId: number): Promise<Reservation[]> => {
@@ -73,4 +87,4 @@ const getReservationsIntoTime = async (date: string, time: string, restaurantId:
         .orderBy('total_seats', 'ASC')
         .getRawMany();
 }
-export default { ReservationRepository, getReservationsHistoryByTime, createReservation, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getAllReservations, getReservationsIntoDayOrderBySeats }
+export default { ReservationRepository, deleteReservation, getReservationsPerDay, getReservationsHistoryByTime, createReservation, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getAllReservations, getReservationsIntoDayOrderBySeats }

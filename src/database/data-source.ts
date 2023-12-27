@@ -4,7 +4,6 @@ import UserAdmin from "../entities/UserAdmin"
 import UserCustomer from "../entities/UserCustomer"
 import Restaurant from "../entities/Restaurant"
 import Reservation from "../entities/Reservation"
-import Times from "../entities/Times"
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -15,7 +14,7 @@ export const AppDataSource = new DataSource({
     database: "reservation_system",
     synchronize: true,
     logging: false,
-    entities: [UserAdmin, UserCustomer, Restaurant, Reservation, Times],
+    entities: [UserAdmin, UserCustomer, Restaurant, Reservation],
     migrations: [],
     subscribers: [],
 })

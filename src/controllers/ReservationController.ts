@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express';
 import ReservationRepository, { IReservationsIntoTime } from '../repositories/ReservationRepository';
 import RestaurantRepository from '../repositories/RestaurantRepository';
-import TimesRepository from '../repositories/TimesRepository';
 import Reservation from '../entities/Reservation';
 
 const ReservationRouter = Router();
@@ -9,7 +8,7 @@ const ReservationRouter = Router();
 const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservationsIntoTime[], time, seats, capacity) => {
   let indexToGetInformation: number;
   //console.log('reservationsIntoDayOrderByTime', reservationsIntoDayOrderByTime);
-  
+
   const recommendationsNearestMap = reservationsIntoDayOrderByTime.map((item, index) => {
     let timePrevious: IReservationsIntoTime;
     let timeNext: IReservationsIntoTime;
@@ -22,23 +21,23 @@ const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservati
       reservationTimePrevious = reservationsIntoDayOrderByTime[index - 1];
       reservationTimeNext = reservationsIntoDayOrderByTime[index + 1];
       console.log('reservationTimeNext', reservationsIntoDayOrderByTime[index + 1])
-      
+
       const reservationSeatsPrevious = reservationsIntoDayOrderByTime[index - 1]?.total_seats;
       const reservationSeatsNext = reservationsIntoDayOrderByTime[index + 1]?.total_seats;
-      console.log('reservationSeatsPrevious',reservationSeatsPrevious);
+      console.log('reservationSeatsPrevious', reservationSeatsPrevious);
       console.log('reservationSeatsNext', reservationSeatsNext);
-      
-    
+
+
 
       //caso disponível pega o anterior ao horário
       console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
-      
-      
+
+
       if ((Number(reservationSeatsPrevious) + seats) < capacity) {
         timePrevious = reservationsIntoDayOrderByTime[index - 1];
       }
       console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
-      
+
       //caso disponível pega o posterior ao horário
       if ((Number(reservationSeatsNext) + seats) < capacity) {
         timeNext = reservationsIntoDayOrderByTime[index + 1];
@@ -54,7 +53,7 @@ const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservati
 const getHistoryRecommendation = (reservationsIntoDayOrderByTime: IReservationsIntoTime[], time, seats, capacity) => {
   let indexToGetInformation: number;
   //console.log('reservationsIntoDayOrderByTime', reservationsIntoDayOrderByTime);
-  
+
   const recommendationsNearestMap = reservationsIntoDayOrderByTime.map((item, index) => {
     let timePrevious: IReservationsIntoTime;
     let timeNext: IReservationsIntoTime;
@@ -67,23 +66,23 @@ const getHistoryRecommendation = (reservationsIntoDayOrderByTime: IReservationsI
       reservationTimePrevious = reservationsIntoDayOrderByTime[index - 1];
       reservationTimeNext = reservationsIntoDayOrderByTime[index + 1];
       console.log('reservationTimeNext', reservationsIntoDayOrderByTime[index + 1])
-      
+
       const reservationSeatsPrevious = reservationsIntoDayOrderByTime[index - 1]?.total_seats;
       const reservationSeatsNext = reservationsIntoDayOrderByTime[index + 1]?.total_seats;
-      console.log('reservationSeatsPrevious',reservationSeatsPrevious);
+      console.log('reservationSeatsPrevious', reservationSeatsPrevious);
       console.log('reservationSeatsNext', reservationSeatsNext);
-      
-    
+
+
 
       //caso disponível pega o anterior ao horário
       console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
-      
-      
+
+
       if ((Number(reservationSeatsPrevious) + seats) < capacity) {
         timePrevious = reservationsIntoDayOrderByTime[index - 1];
       }
       console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
-      
+
       //caso disponível pega o posterior ao horário
       if ((Number(reservationSeatsNext) + seats) < capacity) {
         timeNext = reservationsIntoDayOrderByTime[index + 1];
@@ -97,9 +96,9 @@ const getHistoryRecommendation = (reservationsIntoDayOrderByTime: IReservationsI
 }
 
 const getSeatsReserved = async (date, time, restaurantId) => {
-  
-  const totalReservationsIntoTime = await ReservationRepository.getReservationsIntoTime(date, time, restaurantId); 
-  
+
+  const totalReservationsIntoTime = await ReservationRepository.getReservationsIntoTime(date, time, restaurantId);
+
   return Number(totalReservationsIntoTime[0]?.total_seats) | 0;
 }
 
@@ -111,7 +110,7 @@ const getRestaurantCapacity = async (restaurantId) => {
 }
 
 const getRecommendations = async (reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, reservationsByHistory, time, seats, capacity) => {
-  
+
   const lessBusyTimeRecommendation = reservationsIntoDayOrderBySeats.slice(0, 3);
   const historyByTimeRecommendation = reservationsByHistory.slice(0, 3);
   console.log(historyByTimeRecommendation)
@@ -155,11 +154,24 @@ ReservationRouter.post('/create', async (req: Request, res: Response,): Promise<
     console.log('capacity sum', (seatsReserved + Number(seats)));
 
     if ((seatsReserved + Number(seats)) > capacity) {
-      return res.status(400).send({message: 'Limite de reservas atingido'});
+      return res.status(400).send({ message: 'Limite de reservas atingido' });
     }
 
     const reservations = await ReservationRepository.createReservation(date, time, seats, restaurantId, userCustomerId);
-    return res.status(200).send({message: 'Created Reservation', reservations});
+    return res.status(200).send({ message: 'Created Reservation', reservations });
+  } catch (error) {
+    return res.status(500).send(`Error: ${error}`);
+  }
+});
+
+ReservationRouter.delete('/delete', async (req: Request, res: Response,): Promise<Record<string, any>> => {
+  const { id } = req.body;
+
+  console.log(req.body);
+
+  try {
+    const isDeleted = await ReservationRepository.deleteReservation(id);
+    return res.status(200).send({ message: 'Deleted Reservation', isDeleted });
   } catch (error) {
     return res.status(500).send(`Error: ${error}`);
   }
@@ -171,10 +183,8 @@ ReservationRouter.post('/list', async (req: Request, res: Response,): Promise<Re
   console.log(req.body);
 
   try {
-    const reservations = await ReservationRepository.getAllReservations(restaurantId);
-
-
-    return res.status(200).send('reservations');
+    const reservations = await ReservationRepository.getReservationsPerDay(date, restaurantId);
+    return res.status(200).send(reservations);
   } catch (error) {
     return res.status(500).send(`Error: ${error}`);
   }
@@ -189,7 +199,7 @@ ReservationRouter.post('/recommendations', async (req: Request, res: Response,):
     console.log(seatsReserved)
     console.log(seats)
     console.log(capacity)
-    
+
     if ((seatsReserved + seats) <= capacity) {
 
     } else {
@@ -203,7 +213,7 @@ ReservationRouter.post('/recommendations', async (req: Request, res: Response,):
 
     //console.log('Seats', reservationsIntoDayOrderBySeats);
     //console.log('Times',reservationsIntoDayOrderByTime);
-    
+
     const recommendations = await getRecommendations(reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, reservationsByHistory, time, seats, capacity);
 
     return res.status(200).send(recommendations);
@@ -221,9 +231,9 @@ ReservationRouter.post('/availability', async (req: Request, res: Response,): Pr
     const seatsReserved = await getSeatsReserved(date, time, restaurantId);
 
     if ((seatsReserved + Number(seats)) <= 15) {
-      return res.status(200).json({isAvailability: true});
+      return res.status(200).json({ isAvailability: true });
     } else {
-      return res.status(200).json({isAvailability: false});
+      return res.status(200).json({ isAvailability: false });
     }
 
   } catch (error) {

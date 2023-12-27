@@ -7,7 +7,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 const routes = Router();
 authMiddleware
 
-routes.use('/admin/users', authMiddleware, UserAdminRouter);
+routes.use('/admin/users', UserAdminRouter);
 routes.use('/reservation', ReservationRouter);
 routes.use('/restaurant', RestaurantRouter);
 

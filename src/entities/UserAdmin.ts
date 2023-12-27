@@ -11,9 +11,6 @@ class UserAdmin {
     username: string
 
     @Column('varchar', {length: 100, nullable: false})
-    email: string
-
-    @Column('varchar', {length: 100, nullable: false})
     password: string
 
     @Column('varchar', {length: 10, nullable: false})
