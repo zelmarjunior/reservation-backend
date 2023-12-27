@@ -2,12 +2,24 @@ import Reservation from "../entities/Reservation";
 import { IReservation } from "../interfaces/IReservation";
 import { AppDataSource } from "../database/data-source";
 import { log } from "console";
+import Restaurant from "../entities/Restaurant";
 
 const ReservationRepository = AppDataSource.getRepository(Reservation);
 
 export interface IReservationsIntoTime {
     time: string,
     total_seats: string,
+}
+
+const createReservation = async (date: string, time: string, seats: number, restaurantId: number, userCustomerId: number) => {
+    const reservation = new Reservation();
+    reservation.date = date;
+    reservation.time = time;
+    reservation.seats = seats;
+
+    console.log(reservation)
+     
+    return await ReservationRepository.save(reservation)
 }
 
 const getAllReservations = async (restaurantId: number): Promise<Reservation[]> => {
@@ -17,13 +29,6 @@ const getAllReservations = async (restaurantId: number): Promise<Reservation[]> 
         .innerJoin('reservation.userCustomer', 'userCustomer')
         .innerJoin('reservation.restaurant', 'restaurant')
         .getRawMany();
-
-
-
-    /*     const rawSql = `SELECT * FROM reservation WHERE restaurantId = ${restaurantId} `;
-      
-        
-        return await ReservationRepository.query(rawSql); */
 }
 
 const getReservationsIntoDayOrderBySeats = async (date: string, restaurantId: number): Promise<IReservationsIntoTime[]> => {
@@ -56,4 +61,4 @@ const getReservationsIntoTime = async (date: string, time: string, restaurantId:
         .orderBy('total_seats', 'ASC')
         .getRawMany();
 }
-export default { ReservationRepository, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getAllReservations, getReservationsIntoDayOrderBySeats }
+export default { ReservationRepository, createReservation, getReservationsIntoDayOrderByTime, getReservationsIntoTime, getAllReservations, getReservationsIntoDayOrderBySeats }

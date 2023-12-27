@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
     const { authorization } = req.headers;
 
-    if (!authorization) return res.status(401).send('Missing Auth Token');
+    if (!authorization) return res.status(401).send('Token Invalido');
 
     const authorizarionToken = authorization.split(' ')[1];
     const { id } = jwt.verify(authorizarionToken, process.env.JWT_SECRET_KEY) as JwtPayload;

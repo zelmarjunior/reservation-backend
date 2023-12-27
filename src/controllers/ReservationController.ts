@@ -21,7 +21,7 @@ const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservati
 
       reservationTimePrevious = reservationsIntoDayOrderByTime[index - 1];
       reservationTimeNext = reservationsIntoDayOrderByTime[index + 1];
-      //console.log('reservationTimeNext', reservationsIntoDayOrderByTime[index + 1])
+      console.log('reservationTimeNext', reservationsIntoDayOrderByTime[index + 1])
       
       const reservationSeatsPrevious = reservationsIntoDayOrderByTime[index - 1]?.total_seats;
       const reservationSeatsNext = reservationsIntoDayOrderByTime[index + 1]?.total_seats;
@@ -47,9 +47,10 @@ const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservati
 }
 
 const getSeatsReserved = async (date, time, restaurantId) => {
+  
   const totalReservationsIntoTime = await ReservationRepository.getReservationsIntoTime(date, time, restaurantId); 
-
-  return Number(totalReservationsIntoTime[0].total_seats);
+  
+  return Number(totalReservationsIntoTime[0]?.total_seats) | 0;
 }
 
 const getRestaurantCapacity = async (restaurantId) => {
@@ -61,7 +62,7 @@ const getRestaurantCapacity = async (restaurantId) => {
 
 const getRecommendations = async (reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, time, seats, capacity) => {
   
-  const lessBusyTimeRecommendation = reservationsIntoDayOrderBySeats//.slice(0, 3);
+  const lessBusyTimeRecommendation = reservationsIntoDayOrderBySeats.slice(0, 3);
   //console.log(lessBusyTimeRecommendation)
   const nearestRecommendation = getNearestTimeRecommendation(reservationsIntoDayOrderByTime, time, seats, capacity);
   //console.log(nearestRecommendation)
@@ -90,13 +91,54 @@ const generateTimeArray = (startHour, endHour) => {
 }
 const timeArray = generateTimeArray(11, 15);
 
+ReservationRouter.post('/create', async (req: Request, res: Response,): Promise<Record<string, any>> => {
+  const { date, time, seats, restaurantId, userCustomerId } = req.body;
+
+  console.log(req.body);
+
+  try {
+    const capacity = await getRestaurantCapacity(restaurantId);
+    const seatsReserved = await getSeatsReserved(date, time, restaurantId);
+    console.log('capacity', capacity);
+    console.log('seatsReserved', seatsReserved);
+    console.log('capacity sum', (seatsReserved + Number(seats)));
+
+    if ((seatsReserved + Number(seats)) > capacity) {
+      return res.status(400).send({message: 'Limite de reservas atingido'});
+    }
+
+    const reservations = await ReservationRepository.createReservation(date, time, seats, restaurantId, userCustomerId);
+    return res.status(200).send({message: 'Created Reservation', reservations});
+  } catch (error) {
+    return res.status(500).send(`Error: ${error}`);
+  }
+});
+
+ReservationRouter.post('/list', async (req: Request, res: Response,): Promise<Record<string, any>> => {
+  const { date, restaurantId } = req.body;
+
+  console.log(req.body);
+
+  try {
+    const reservations = await ReservationRepository.getAllReservations(restaurantId);
+
+
+    return res.status(200).send('reservations');
+  } catch (error) {
+    return res.status(500).send(`Error: ${error}`);
+  }
+});
+
 ReservationRouter.post('/recommendations', async (req: Request, res: Response,): Promise<Record<string, any>> => {
   const { date, time, seats, restaurantId } = req.body;
 
   try {
     const capacity = await getRestaurantCapacity(restaurantId);
     const seatsReserved = await getSeatsReserved(date, time, restaurantId);
-
+    console.log(seatsReserved)
+    console.log(seats)
+    console.log(capacity)
+    
     if ((seatsReserved + seats) <= capacity) {
 
     } else {
