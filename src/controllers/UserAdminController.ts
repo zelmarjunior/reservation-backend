@@ -19,10 +19,8 @@ UserAdminRouter.post('/createUser', async (req: Request, res: Response,): Promis
 
     const hashPassword = await bcrypt.hash(password, 10);
     try {
-        const newUser = await UserAdminRepository.createUser(username, hashPassword, role, restaurantId);
-        console.log(newUser);
-
-        return res.status(201).json({ newUser })
+        await UserAdminRepository.createUser(username, hashPassword, role, restaurantId);
+        return res.end('Created User!')
     } catch (error) {
         res.status(400).send('Error on create user.');
     }
@@ -30,12 +28,13 @@ UserAdminRouter.post('/createUser', async (req: Request, res: Response,): Promis
 
 UserAdminRouter.post('/login', async (req: Request, res: Response,): Promise<Response> => {
     const { username, password } = req.body;
+    console.log(username, password);
 
-    const user = await UserAdminRepository.getUser(username);
+    const user = await UserAdminRepository.getUser(username);    
 
-    if (!user) res.status(400).send('Usuário ou senha incorreta!');
+    if (!user) return res.status(400).send('Usuário ou senha incorreta!');
 
-    const verifyPass = await bcrypt.compare(password, user.password);
+    const verifyPass = await bcrypt.compare(password, user?.password);
 
     if (!verifyPass) res.status(400).send('Usuário ou senha incorreta!');
 
@@ -43,10 +42,5 @@ UserAdminRouter.post('/login', async (req: Request, res: Response,): Promise<Res
 
     return res.status(200).json({ token })
 });
-
-
-UserAdminRouter.post('/auth', );
-
-
 
 export default UserAdminRouter;

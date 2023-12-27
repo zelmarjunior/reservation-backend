@@ -2,7 +2,7 @@ import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from 'typeorm';
 import {UserRole} from '../interfaces/IUsers';
 import Restaurant from './Restaurant';
 
-@Entity('userAdmin')
+@Entity('user_admin')
 class UserAdmin {
     @PrimaryGeneratedColumn('increment')
     id: number;

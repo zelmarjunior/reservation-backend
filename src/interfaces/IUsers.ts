@@ -7,7 +7,6 @@ export  interface IUserAdmin {
     role: UserRole
 }
 
-
 export interface IUserCustomer {
     id?: number,
     username: string,

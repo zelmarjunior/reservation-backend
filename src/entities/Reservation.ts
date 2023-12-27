@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import Restaurant from './Restaurant';
 import UserCustomer from './UserCustomer';
 
@@ -7,26 +7,28 @@ class Reservation {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @Column('varchar', {length: 10, nullable: false})
+    @Column('varchar', { length: 10, nullable: false })
     date: string
 
-    @Column('varchar', {length: 10, nullable: false})
+    @Column('varchar', { length: 10, nullable: false })
     time: string
 
-    @Column('int', {nullable: false})
+    @Column('int', { nullable: false })
     seats: number
 
     @CreateDateColumn()
-    createdAt: Date;
-  
+    created_at: Date;
+
     @UpdateDateColumn()
-    updatedAt: Date;
+    updated_at: Date;
 
-    @ManyToOne((type) => Restaurant, (restaurant) => restaurant.id)
-    restaurant: Restaurant
-
-    @ManyToOne((type) => UserCustomer, (userCustomer) => userCustomer.id)
-    userCustomer: UserCustomer
+    @ManyToOne(() => Restaurant, restaurant => restaurant.reservations)
+    @JoinColumn({ name: 'restaurant_id' })
+    restaurant: Restaurant;
+  
+    @ManyToOne(() => UserCustomer, user_customer => user_customer.id) // Inverso da relação em UserCustomer
+    @JoinColumn({ name: 'user_customer' })
+    user_customer: UserCustomer;
 }
 
 export default Reservation;

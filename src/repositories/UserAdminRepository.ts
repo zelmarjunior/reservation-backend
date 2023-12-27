@@ -14,6 +14,8 @@ const getUserById = (id: number): Promise<UserAdmin> => {
 }
 
 const getUser = (username: string): Promise<UserAdmin> => {
+    console.log('teste',username);
+    
     return UserAdminRepository.findOneBy({ username });
 }
 
@@ -31,7 +33,7 @@ const createUser = async (username: string, hashPassword: string, role: string, 
             role: role as "owner" | "editor" | "reader",
             restaurant,
         });
-
+        
         return await UserAdminRepository.save(newUser);
     } catch (error) {
         console.error('Error creating user:', error.message);

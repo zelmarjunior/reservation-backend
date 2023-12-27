@@ -25,15 +25,65 @@ const getNearestTimeRecommendation = (reservationsIntoDayOrderByTime: IReservati
       
       const reservationSeatsPrevious = reservationsIntoDayOrderByTime[index - 1]?.total_seats;
       const reservationSeatsNext = reservationsIntoDayOrderByTime[index + 1]?.total_seats;
-
+      console.log('reservationSeatsPrevious',reservationSeatsPrevious);
+      console.log('reservationSeatsNext', reservationSeatsNext);
+      
     
 
       //caso disponível pega o anterior ao horário
-
+      console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
+      
+      
       if ((Number(reservationSeatsPrevious) + seats) < capacity) {
         timePrevious = reservationsIntoDayOrderByTime[index - 1];
       }
+      console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
+      
+      //caso disponível pega o posterior ao horário
+      if ((Number(reservationSeatsNext) + seats) < capacity) {
+        timeNext = reservationsIntoDayOrderByTime[index + 1];
+      }
+    }
 
+    return [timeNext, timePrevious]
+  });
+  const recommendationsNearest = recommendationsNearestMap[indexToGetInformation];
+  return recommendationsNearest
+}
+
+const getHistoryRecommendation = (reservationsIntoDayOrderByTime: IReservationsIntoTime[], time, seats, capacity) => {
+  let indexToGetInformation: number;
+  //console.log('reservationsIntoDayOrderByTime', reservationsIntoDayOrderByTime);
+  
+  const recommendationsNearestMap = reservationsIntoDayOrderByTime.map((item, index) => {
+    let timePrevious: IReservationsIntoTime;
+    let timeNext: IReservationsIntoTime;
+    let reservationTimePrevious: IReservationsIntoTime
+    let reservationTimeNext: IReservationsIntoTime
+
+    if (item.time === time) {
+      indexToGetInformation = index;
+
+      reservationTimePrevious = reservationsIntoDayOrderByTime[index - 1];
+      reservationTimeNext = reservationsIntoDayOrderByTime[index + 1];
+      console.log('reservationTimeNext', reservationsIntoDayOrderByTime[index + 1])
+      
+      const reservationSeatsPrevious = reservationsIntoDayOrderByTime[index - 1]?.total_seats;
+      const reservationSeatsNext = reservationsIntoDayOrderByTime[index + 1]?.total_seats;
+      console.log('reservationSeatsPrevious',reservationSeatsPrevious);
+      console.log('reservationSeatsNext', reservationSeatsNext);
+      
+    
+
+      //caso disponível pega o anterior ao horário
+      console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
+      
+      
+      if ((Number(reservationSeatsPrevious) + seats) < capacity) {
+        timePrevious = reservationsIntoDayOrderByTime[index - 1];
+      }
+      console.log('soma de horariosssss', (Number(reservationSeatsPrevious) + seats));
+      
       //caso disponível pega o posterior ao horário
       if ((Number(reservationSeatsNext) + seats) < capacity) {
         timeNext = reservationsIntoDayOrderByTime[index + 1];
@@ -60,14 +110,15 @@ const getRestaurantCapacity = async (restaurantId) => {
   return capacity
 }
 
-const getRecommendations = async (reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, time, seats, capacity) => {
+const getRecommendations = async (reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, reservationsByHistory, time, seats, capacity) => {
   
   const lessBusyTimeRecommendation = reservationsIntoDayOrderBySeats.slice(0, 3);
-  //console.log(lessBusyTimeRecommendation)
+  const historyByTimeRecommendation = reservationsByHistory.slice(0, 3);
+  console.log(historyByTimeRecommendation)
   const nearestRecommendation = getNearestTimeRecommendation(reservationsIntoDayOrderByTime, time, seats, capacity);
   //console.log(nearestRecommendation)
 
-  return { lessBusyTimeRecommendation, nearestRecommendation }
+  return [{ lessBusyTimeRecommendation, nearestRecommendation, historyByTimeRecommendation }]
 }
 
 const generateTimeArray = (startHour, endHour) => {
@@ -148,11 +199,12 @@ ReservationRouter.post('/recommendations', async (req: Request, res: Response,):
 
     const reservationsIntoDayOrderBySeats = await ReservationRepository.getReservationsIntoDayOrderBySeats(date, restaurantId);
     const reservationsIntoDayOrderByTime = await ReservationRepository.getReservationsIntoDayOrderByTime(date, restaurantId);
+    const reservationsByHistory = await ReservationRepository.getReservationsHistoryByTime(date, restaurantId);
 
     //console.log('Seats', reservationsIntoDayOrderBySeats);
     //console.log('Times',reservationsIntoDayOrderByTime);
     
-    const recommendations = await getRecommendations(reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, time, seats, capacity);
+    const recommendations = await getRecommendations(reservationsIntoDayOrderBySeats, reservationsIntoDayOrderByTime, reservationsByHistory, time, seats, capacity);
 
     return res.status(200).send(recommendations);
 
